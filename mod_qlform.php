@@ -265,17 +265,24 @@ try {
         }
         $dataJsonified = $objHelper->subarrayToJson($data);
 
+        $dataWithoutServer = $data;
+        if (isset($dataWithoutServer['server'])) {
+            unset($dataWithoutServer['server']);
+        }
+
         if ($params->get('todoDatabase') && $boolCheckDatabase) {
             if ($objHelper->processData) $dataJsonified = $objHelper->processFor($dataJsonified, 'database');
             if ($params->get('databaseaddcreated')) $dataJsonified['created'] = date('Y-m-d H:i:s');
             if ($params->get('showDataSavedToDatabase')) $objHelper->arrMessages[] = ['str' => '<strong>' . Text::_('MOD_QLFORM_SHOWDATASAVEDTODATABASE_LABEL') . '</strong><br />' . $objHelper->dump($dataJsonified, 'foreachstring')];
-            $objHelper->saveToDatabase($params->get('databasetable'), $dataJsonified);
+            $uniqueIdColumn = $params->get('dbUniqueId');
+            $objHelper->saveToDatabase($params->get('databasetable'), $dataJsonified, [], $uniqueIdColumn);
         }
         if ($params->get('todoDatabaseExternal') && $boolCheckDatabaseExternal) {
             if ($objHelper->processData) $dataJsonified = $objHelper->processFor($dataJsonified, 'databaseExternal');
             if ($params->get('databaseexternaladdcreated')) $dataJsonified['created'] = date('Y-m-d H:i:s');
             if ($params->get('showDataSavedToDatabaseexternal')) $objHelper->arrMessages[] = ['str' => '<strong>' . Text::_('MOD_QLFORM_SHOWDATASAVEDTODATABASE_LABEL') . '</strong><br />' . $objHelper->dump($dataJsonified, 'foreachstring')];
-            $objHelper->saveToDatabase($params->get('databaseexternaltable'), $dataJsonified, $arrParamsDatabaseExternal);
+            $uniqueIdColumn = $params->get('dbExternalUniqueId');
+            $objHelper->saveToDatabase($params->get('databaseexternaltable'), $dataJsonified, $arrParamsDatabaseExternal, $uniqueIdColumn);
         }
         if ($params->get('todoSomethingElse')) {
             if ($objHelper->processData) $data = $objHelper->processFor($data, 'somethingElse');
@@ -291,10 +298,6 @@ try {
             $objHelper->sendJmessageAll($data);
         }
         if ($params->get('todoSendcopy') && isset($_POST[$objHelper->formControl]) && isset($_POST[$objHelper->formControl]['sendcopy']) && 1 == $_POST[$objHelper->formControl]['sendcopy'] && !empty($data[$params->get('sendcopyfieldname')])) {
-            $dataWithoutServer = $data;
-            if (isset($dataWithoutServer['server'])) {
-                unset($dataWithoutServer['server']);
-            }
             if ($objHelper->processData) {
                 $dataWithoutServer = $objHelper->processFor($dataWithoutServer, 'sendcopy');
             }
@@ -334,9 +337,11 @@ try {
     $objHelper->arrMessages[] = ['str' => $e->getMessage()];
 }
 
-/*Display messages*/
-$messages = '';
-if (is_array($objHelper->arrMessages) && 0 < count($objHelper->arrMessages)) {
-    $messages = $objHelper->displayMessages($params->get('messageType'));
-}
+/* Display messages */
+$dataForMessages = $objHelper->processFor($data, 'message');
+$objHelper->prepareMessages($dataForMessages);
+$messages = (is_array($objHelper->arrMessages) && 0 < count($objHelper->arrMessages))
+    ? $objHelper->displayMessages($params->get('messageType'))
+    : '';
+
 require ModuleHelper::getLayoutPath('mod_qlform', $params->get('layout', 'default'));

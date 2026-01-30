@@ -27,6 +27,8 @@ class QlformHelper
     public ?array $files = [];
     public bool $processData = false;
     public array $arrFields = [];
+    public array $arrTableFields = [];
+    public array $arrClean = [];
     public Registry $params;
     public Form $form;
     public \stdClass $module;
@@ -39,6 +41,8 @@ class QlformHelper
     public string $linebreak = "\n";
     private $db = null;
     private ?JConfig $config = null;
+    private $dbInsertId = null;
+    private $dbExternalInsertId = null;
 
     /**
      * constructor
@@ -398,11 +402,16 @@ class QlformHelper
      * @param array $paramsDatabaseExternal
      * @return  bool    true on success, false on failure
      */
-    public function saveToDatabase($table, $data, $paramsDatabaseExternal = [])
+    public function saveToDatabase($table, $data, $paramsDatabaseExternal = [], ?string $uniqueIdColumn = null)
     {
         $data = array_intersect_key($data, $this->arrTableFields);
-        if (0 == count($paramsDatabaseExternal)) $this->objDatabase->save($table, $data);
-        else $this->objDatabaseexternal->save($table, $data);;
+        if (0 == count($paramsDatabaseExternal)) {
+            $this->objDatabase->save($table, $data, $uniqueIdColumn);
+            $this->setDbInsertId($data->{$uniqueIdColumn} ?? null);
+            return true;
+        }
+        $this->objDatabaseexternal->save($table, $data);
+        $this->setDbExternalInsertId($data->{$uniqueIdColumn} ?? null);
         return true;
     }
 
@@ -1140,14 +1149,13 @@ class QlformHelper
      * @param $data
      * @param $module
      * @param $form
-     * @return bool
      */
     function initPreprocessing($data, $module, $form)
     {
         $this->processData = false;
         if ($this->checkIfCustomExists('QlformNamespace\Module\Qlform\Site\Helper\modQlformPreprocessData')) $this->processData = true;
         else return false;
-        $this->obj_processor = new modQlformPreprocessData($data, $this->params, $module, $form);
+        $this->obj_processor = new modQlformPreprocessData($data, $this->params, $module, $form, $this);
     }
 
     /**
@@ -1158,6 +1166,23 @@ class QlformHelper
     function processFor($data, $for)
     {
         return $this->obj_processor->$for($data);
+    }
+
+    function prepareMessages(array $data)
+    {
+        foreach ($this->arrMessages as $k => $messageData) {
+            $message = $messageData['str'] ?? '';
+            $this->arrMessages[$k]['str'] = static::replacePlaceholders($message, $data);
+        }
+    }
+
+    static function replacePlaceholders(string $text, array $data): string
+    {
+        foreach ($data as $placeholderRaw => $replacement) {
+            $placeholder = sprintf('{{%s}}', $placeholderRaw);
+            $text = str_replace($placeholder, $replacement, $text);
+        }
+        return $text;
     }
 
     static public function getDatabaseDriver()
@@ -1181,5 +1206,37 @@ class QlformHelper
             ? trim(substr($pretext, 0, strpos($pretext, '~~')))
             : $pretext;
         return $pretext;
+    }
+
+    /**
+     * @return null
+     */
+    public function getDbInsertId()
+    {
+        return $this->dbInsertId;
+    }
+
+    /**
+     * @param null $dbInsertId
+     */
+    public function setDbInsertId($dbInsertId): void
+    {
+        $this->dbInsertId = $dbInsertId;
+    }
+
+    /**
+     * @return null
+     */
+    public function getDbExternalInsertId()
+    {
+        return $this->dbExternalInsertId;
+    }
+
+    /**
+     * @param null $dbExternalInsertId
+     */
+    public function setDbExternalInsertId($dbExternalInsertId): void
+    {
+        $this->dbExternalInsertId = $dbExternalInsertId;
     }
 }

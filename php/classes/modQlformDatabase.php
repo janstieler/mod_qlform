@@ -43,11 +43,11 @@ class modQlformDatabase
      * @return  mixed A database resource if successful, FALSE if not.
      *
      */
-    public function save(string $table, $data)
+    public function save(string $table, &$data, ?string $uniqueIdColumnName = null)
     {
         $db = $this->getDatabase();
         $data = $this->objectToArrayOrTheOtherWay($data);
-        return $db->insertObject($table, $data);
+        return $db->insertObject($table, $data, $uniqueIdColumnName);
     }
 
     /**

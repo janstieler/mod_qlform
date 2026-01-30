@@ -12,14 +12,13 @@ defined('_JEXEC') or die;
 
 class modQlformJmessages
 {
+
+    public $db = null;
+
     /**
      * method for mailing using JoomlaMailer
      *
-     * @param string $to recipient of mail
-     * @param string $subject for mail
-     * @param array $data post data from form
-     *
-     * @return  bool  True on success, false on failure
+     * @param $db
      */
     public function __construct($db)
     {
@@ -29,8 +28,6 @@ class modQlformJmessages
     /**
      * method for mailing using JoomlaMailer
      *
-     * @param string $to recipient of mail
-     * @param string $subject for mail
      * @param array $data post data from form
      *
      * @return  bool  True on success, false on failure
@@ -59,8 +56,11 @@ class modQlformJmessages
     /**
      * method to generate headline and body of mail
      *
-     * @param array $data
+     * @param $recipient
+     * @param $sender
      * @param string $subject
+     * @param $message
+     * @return array
      */
     public function getData($recipient, $sender, $subject, $message)
     {
@@ -78,7 +78,7 @@ class modQlformJmessages
     /**
      * Method to check validation of e-mail address
      *
-     * @param string $str wouldbe-email address
+     * @param string $str would-email address
      * @return  bool    true on success; false on failure
      */
     public function getDataAsString($data, $strtype = 'html', $separator = '#')
@@ -129,7 +129,7 @@ class modQlformJmessages
      * method to turn subarray into string via json_encode
      *
      * @param array $array multidimensional array
-     * @return array $array array containing subarray as jsonified strings
+     * @return string $array array containing subarray as jsonified strings
      */
     function getHtml($array)
     {
@@ -146,7 +146,8 @@ class modQlformJmessages
      * method to turn subarray into string via json_encode
      *
      * @param array $array multidimensional array
-     * @return array $array array containing subarray as jsonified strings
+     * @param $separator
+     * @return string $array array containing subarray as jsonified strings
      */
     function getImplode($array, $separator)
     {
