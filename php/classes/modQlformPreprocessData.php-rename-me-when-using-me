@@ -87,6 +87,14 @@ class modQlformPreprocessData
     }
 
     /**
+     * process data before mailing
+     */
+    public function message($data)
+    {
+        return $data;
+    }
+
+    /**
      * process data before database storing
      */
     public function database($data)

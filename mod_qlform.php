@@ -331,15 +331,19 @@ try {
         echo $json;
         exit;
     }
+
+    /* Display messages */
+    $dataForMessages = $objHelper->processData
+        ? $objHelper->processFor($data, 'message')
+        : [];
+
+    $objHelper->prepareMessages($dataForMessages);
 } catch (Error $e) {
     $objHelper->arrMessages[] = ['str' => $e->getMessage()];
 } catch (Exception $e) {
     $objHelper->arrMessages[] = ['str' => $e->getMessage()];
 }
 
-/* Display messages */
-$dataForMessages = $objHelper->processFor($data, 'message');
-$objHelper->prepareMessages($dataForMessages);
 $messages = (is_array($objHelper->arrMessages) && 0 < count($objHelper->arrMessages))
     ? $objHelper->displayMessages($params->get('messageType'))
     : '';

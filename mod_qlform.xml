@@ -6,11 +6,11 @@
     <name>qlform</name>
     <author>Mareike Riegel</author>
     <creationDate>2026-01-30</creationDate>
-    <copyright>Copyright (C) 2025 ql.de</copyright>
+    <copyright>Copyright (C) 2026 ql.de</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>mareike.riegel@ql.de</authorEmail>
     <authorUrl>https://ql.de</authorUrl>
-    <version>14.2.1</version>
+    <version>14.2.2</version>
     <description>qlform generates a form; form fields are defined via J!-form generation. You'll love it!</description>
     <namespace>QlformNamespace\Module\Qlform\Site\Helper</namespace>
     <updateservers>
@@ -68,6 +68,7 @@
                         validate="xml"
                         cols="70"
                         rows="20"
+                        style="width:100%;"
                         label="MOD_QLFORM_XML_LABEL"
                         description="MOD_QLFORM_XML_DESC"
                         default='[form]&#13;&#10; [fieldset name="fieldset1"]&#13;&#10;  [field name="name" label="Name" type="text" required="true" /]&#13;&#10;  [field name="email" label="E-mail" type="email" required="true" validate="email" /]&#13;&#10;  [field name="subject" label="Subject" type="text" /]&#13;&#10;  [field name="message" label="Message" type="textarea" required="true" /]&#13;&#10; [/fieldset] &#13;&#10;[/form]'
